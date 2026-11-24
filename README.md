@@ -1,2 +1,12 @@
-# Trabalho-Arquitetura-de-Computadores-CDI-
-Um trabalho envolvendo arduino simulando/explicando um cardiodesfibrilador implantável (CDI)
+# Trabalho-Arquitetura-de-Computadores-CDI
+Integrante: Jorge Henrique Dias Combé (e-mail: jorgecombe@UPE.br / Github: Jotage1329)
+
+## Contexto e História:
+
+## Funcionadlidades:
+
+## Especificações técnicas e componentes:
+
+## Diagrama de Conexões:
+
+## Instruções de compilação e gravação:
