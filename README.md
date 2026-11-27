@@ -44,3 +44,5 @@ OBS: caso queira construir um dispositivo para ser usado na vida real com um cor
 <img width="873" height="658" alt="image" src="https://github.com/user-attachments/assets/09840e0c-d7a5-42df-82dd-6c2258015dea" />
 
 E, finalmente, seu projeto estará terminado
+
+Caso queira experimentar, aqui está o link de uma versão no tinkercad simulando o circuito inteiro: https://www.tinkercad.com/things/hwMTyF93VLJ-dispositivo-simulador-de-batidas-de-coracao
