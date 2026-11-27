@@ -1,0 +1,146 @@
+#include <Wire.h>
+#include <Adafruit_LiquidCrystal.h>
+
+Adafruit_LiquidCrystal lcd(0);
+
+const int LED_VERDE = 10;
+const int LED_AMARELO = 9;
+const int LED_VERMELHO = 8;
+const int PIEZO = 11;
+const int BOTAO = 2;
+
+int batimentos = 0;
+int historico[3] = {-1, -1, -1};
+
+unsigned long inicioJanela = 0;
+const unsigned long DURACAO_JANELA = 3000;
+
+
+int estadoAnterior = HIGH;
+unsigned long ultimoClique = 0;
+const unsigned long DEBOUNCE = 200;
+
+
+
+// ----------------------------
+
+
+
+void desligarLEDs() {
+  digitalWrite(LED_VERDE, LOW);
+  digitalWrite(LED_AMARELO, LOW);
+  digitalWrite(LED_VERMELHO, LOW);
+}
+
+
+void atualizarHistorico(int valor) {
+  historico[0] = historico[1];
+  historico[1] = historico[2];
+  historico[2] = valor;
+}
+
+
+bool variacaoBrusca() {
+  if (historico[0] < 0 || historico[1] < 0 || historico[2] < 0)
+    return false;
+
+  int diferenca1 = abs(historico[1] - historico[0]);
+  int diferenca2 = abs(historico[2] - historico[1]);
+
+  return (diferenca1 >= 4 && diferenca2 >= 4);
+}
+
+
+void mostrarLCD(int valorAtual, const char* status) {
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("B:");
+  
+
+  for (int i = 0; i < 3; i++) {
+    lcd.print(" ");
+    if (historico[i] >= 0)
+      lcd.print(historico[i]);
+    else
+      lcd.print("--");
+  }
+  
+
+  lcd.setCursor(0, 1);
+  lcd.print(status);
+}
+
+
+void analisar() {
+  int valor = batimentos;
+  batimentos = 0;
+
+  atualizarHistorico(valor);
+
+  desligarLEDs();
+  noTone(PIEZO);
+
+  if (valor == 0) {
+    digitalWrite(LED_VERMELHO, HIGH);
+    tone(PIEZO, 1000);
+    mostrarLCD(valor, "SOCORRO!");
+  }
+  else if (variacaoBrusca()) {
+    digitalWrite(LED_VERMELHO, HIGH);
+    mostrarLCD(valor, "ARRTMIA!");
+  }
+  else if (valor < 5) {
+    digitalWrite(LED_AMARELO, HIGH);
+    mostrarLCD(valor, "LENTO!");
+  }
+  else if (valor > 9){
+    digitalWrite(LED_AMARELO, HIGH);
+    mostrarLCD(valor,"RAPIDO!");
+  }
+  else {
+    digitalWrite(LED_VERDE, HIGH);
+    mostrarLCD(valor, "NORMAL");
+  }
+}
+
+
+void setup() {
+  pinMode(LED_VERDE, OUTPUT);
+  pinMode(LED_AMARELO, OUTPUT);
+  pinMode(LED_VERMELHO, OUTPUT);
+
+  pinMode(PIEZO, OUTPUT);
+  pinMode(BOTAO, INPUT_PULLUP);
+
+  lcd.begin(16, 2);
+  lcd.setBacklight(1);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Monitor iniciado");
+  lcd.setCursor(0, 1);
+  lcd.print("Simulacao");
+
+  inicioJanela = millis();
+}
+
+
+void loop() {
+  int estadoBotao = digitalRead(BOTAO);
+
+  
+  if (estadoAnterior == HIGH && estadoBotao == LOW) {
+    if (millis() - ultimoClique >= DEBOUNCE) {
+      batimentos++;
+      ultimoClique = millis();
+    }
+  }
+
+  estadoAnterior = estadoBotao;
+  
+
+  if (millis() - inicioJanela >= DURACAO_JANELA) {
+    analisar();
+    inicioJanela = millis();
+  }
+}
